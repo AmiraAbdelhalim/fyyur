@@ -28,11 +28,6 @@ migrate = Migrate(app, db)
 #----------------------------------------------------------------------------#
 # Models.
 #----------------------------------------------------------------------------#
-shows_table = db.Table('show',
-  db.Column('artist_id', db.Integer, db.ForeignKey('artist.id'), primary_key=True),
-  db.Column('venue_id', db.Integer, db.ForeignKey('venue.id'), primary_key=True),
-  db.Column('start_time', db.DateTime)
-)
 
 class Venue(db.Model):
     # __tablename__ = 'Venue'
@@ -45,7 +40,7 @@ class Venue(db.Model):
     phone = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
-    shows = db.relationship('Artist', secondary=shows_table, backref=db.backref('Venue', lazy=True))
+    shows = db.relationship('Show', backref=db.backref('Venue', lazy=True))
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
@@ -60,11 +55,16 @@ class Artist(db.Model):
     genres = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
+    shows = db.relationship('Show', backref=db.backref('Artist', lazy=True))
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
-
+class Show(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  venue_id = db.Column(db.Integer, db.ForeignKey(Venue.id), nullable=False)
+  artist_id = db.Column(db.Integer, db.ForeignKey(Artist.id), nullable=False)
+  start_time = db.Column(db.String(), nullable=False)
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -432,6 +432,17 @@ def create_artist_submission():
   # called upon submitting the new artist listing form
   # TODO: insert form data as a new Venue record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
+  name = request.form.get('name')
+  city = request.form.get('city')
+  state = request.form.get('state')
+  phone = request.form.get('phone')
+  genres = request.form.get('genres')
+  image_link = request.form.get('image_link')
+  facebook_link = request.form.get('facebook_link')
+
+  artist = Artist(name=name, city=city, state=state,  phone=phone, genres=genres, image_link=image_link, facebook_link=facebook_link)
+  db.session.add(artist)
+  db.session.commit()
 
   # on successful db insert, flash success
   flash('Artist ' + request.form['name'] + ' was successfully listed!')
@@ -496,6 +507,12 @@ def create_shows():
 def create_show_submission():
   # called to create new shows in the db, upon submitting new show listing form
   # TODO: insert form data as a new Show record in the db, instead
+  artist_id = request.form.get('artist_id')
+  venue_id = request.form.get('venue_id')
+  start_time = request.form.get('start_time')
+  show = Show(artist_id=artist_id, venue_id=venue_id, start_time=start_time)
+  db.session.add(show)
+  db.session.commit()
 
   # on successful db insert, flash success
   flash('Show was successfully listed!')
