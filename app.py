@@ -28,14 +28,14 @@ migrate = Migrate(app, db)
 #----------------------------------------------------------------------------#
 # Models.
 #----------------------------------------------------------------------------#
-shows_table = db.Table('Show',
-  db.Column('artist_id', db.Integer, db.ForeignKey('Artist.id'), primary_key=True),
-  db.Column('venue_id', db.Integer, db.ForeignKey('Venue.id'), primary_key=True),
+shows_table = db.Table('show',
+  db.Column('artist_id', db.Integer, db.ForeignKey('artist.id'), primary_key=True),
+  db.Column('venue_id', db.Integer, db.ForeignKey('venue.id'), primary_key=True),
   db.Column('start_time', db.DateTime)
 )
 
 class Venue(db.Model):
-    __tablename__ = 'Venue'
+    # __tablename__ = 'Venue'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -50,7 +50,7 @@ class Venue(db.Model):
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
 class Artist(db.Model):
-    __tablename__ = 'Artist'
+    # __tablename__ = 'Artist'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -230,7 +230,15 @@ def create_venue_form():
 def create_venue_submission():
   # TODO: insert form data as a new Venue record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
-
+  name = request.form.get('name')
+  city = request.form.get('city')
+  state = request.form.get('state')
+  address = request.form.get('address')
+  phone = request.form.get('phone')
+  facebook_link = request.form.get('facebook_link')
+  venue = Venue(name=name, city=city, state=state, address=address, phone=phone, facebook_link=facebook_link)
+  db.session.add(venue)
+  db.session.commit()
   # on successful db insert, flash success
   flash('Venue ' + request.form['name'] + ' was successfully listed!')
   # TODO: on unsuccessful db insert, flash an error instead.
