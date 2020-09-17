@@ -43,6 +43,8 @@ class Venue(db.Model):
     shows = db.relationship('Show', backref=db.backref('Venue', lazy=True))
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
+    genres = db.Column(db.String(120))
+    website = db.Column(db.String(120))
 
 class Artist(db.Model):
     # __tablename__ = 'Artist'
@@ -58,6 +60,8 @@ class Artist(db.Model):
     shows = db.relationship('Show', backref=db.backref('Artist', lazy=True))
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
+    website = db.Column(db.String(120))
+
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
 class Show(db.Model):
@@ -230,15 +234,28 @@ def create_venue_form():
 def create_venue_submission():
   # TODO: insert form data as a new Venue record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
-  form = VenueForm()
-  if form.validate_on_submit():
-    name = request.form.get('name')
-    city = request.form.get('city')
-    state = request.form.get('state')
-    address = request.form.get('address')
-    phone = request.form.get('phone')
-    facebook_link = request.form.get('facebook_link')
-    venue = Venue(name=name, city=city, state=state, address=address, phone=phone, facebook_link=facebook_link)
+  # form = VenueForm(request.form)
+  # if form.validate():
+  name = request.form.get('name')
+  city = request.form.get('city')
+  state = request.form.get('state')
+  address = request.form.get('address')
+  phone = request.form.get('phone')
+  facebook_link = request.form.get('facebook_link')
+  image_link  = request.form.get('image_link')
+  website = request.form.get('website')
+  genres = request.form.getlist('genres')
+  venue = Venue(
+    name=name,
+    city=city,
+    state=state,
+    address=address,
+    phone=phone,
+    genres=genres,
+    website=website, 
+    image_link=image_link,
+    facebook_link=facebook_link)
+  try: 
     db.session.add(venue)
     db.session.commit()
     # on successful db insert, flash success
@@ -246,8 +263,11 @@ def create_venue_submission():
     # TODO: on unsuccessful db insert, flash an error instead.
     # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
     # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-  else:
+  except:
+    db.session.rollback()
     flash('An error occurred. Venue ' + request.form['name'] + ' could not be listed.')
+  finally:
+    db.session.close()
   return render_template('pages/home.html')
 
 
@@ -441,11 +461,12 @@ def create_artist_submission():
   city = request.form.get('city')
   state = request.form.get('state')
   phone = request.form.get('phone')
-  genres = request.form.get('genres')
+  genres = request.form.getlist('genres')
+  website = request.form.get('website')
   image_link = request.form.get('image_link')
   facebook_link = request.form.get('facebook_link')
 
-  artist = Artist(name=name, city=city, state=state,  phone=phone, genres=genres, image_link=image_link, facebook_link=facebook_link)
+  artist = Artist(name=name, city=city, state=state,  phone=phone, genres=genres, website=website, image_link=image_link, facebook_link=facebook_link)
   db.session.add(artist)
   db.session.commit()
 
