@@ -45,6 +45,10 @@ class Venue(db.Model):
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
     genres = db.Column(db.String(120))
     website = db.Column(db.String(120))
+    # seeking_description = db.Column(db.Text)
+    # upcoming_shows_count = db.Column(db.Integer, default=0)
+    # past_shows_count = db.Column(db.Integer, default=0)
+
 
 class Artist(db.Model):
     # __tablename__ = 'Artist'
@@ -61,6 +65,10 @@ class Artist(db.Model):
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
     website = db.Column(db.String(120))
+    # seeking_description = db.Column(db.Text)
+    # upcoming_shows_count = db.Column(db.Integer, default=0)
+    # past_shows_count = db.Column(db.Integer, default=0)
+
 
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
@@ -100,27 +108,21 @@ def index():
 def venues():
   # TODO: replace with real venues data.
   #       num_shows should be aggregated based on number of upcoming shows per venue.
-  data=[{
-    "city": "San Francisco",
-    "state": "CA",
-    "venues": [{
-      "id": 1,
-      "name": "The Musical Hop",
-      "num_upcoming_shows": 0,
-    }, {
-      "id": 3,
-      "name": "Park Square Live Music & Coffee",
-      "num_upcoming_shows": 1,
-    }]
-  }, {
-    "city": "New York",
-    "state": "NY",
-    "venues": [{
-      "id": 2,
-      "name": "The Dueling Pianos Bar",
-      "num_upcoming_shows": 0,
-    }]
-  }]
+  data = []
+  venues = db.session.query(Venue.city, Venue.state).group_by(Venue.city, Venue.state).all()
+  for area in venues:
+    venues_details = db.session.query(Venue.id, Venue.name).filter(Venue.city==area[0], Venue.state==area[1]).all()
+    data.append({
+      'city':area[0],
+      'state':area[1],
+      'venues':[]
+    })
+    for venue in venues_details:
+      data[-1]['venues'].append({
+        'id':venue[0],
+        'name':venue[1]
+      })
+  
   return render_template('pages/venues.html', areas=data);
 
 @app.route('/venues/search', methods=['POST'])
