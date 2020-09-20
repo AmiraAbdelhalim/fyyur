@@ -10,10 +10,32 @@
 				<i class="fas fa-music"></i>
 				<div class="item">
 					<h5>{{ venue.name }}</h5>
+					
 				</div>
 			</a>
+			<button class="delete-venue">Delete</button>
 		</li>
 		{% endfor %}
 	</ul>
 {% endfor %}
+<script>
+	//delete a task
+	const deleteBtns = document.querySelectorAll('.delete-venue');
+	for(let i = 0; i < deleteBtns.length; i++){
+		const deleteBtn = deleteBtns[i];
+		const v_id = deleteBtn.getAttribute("data_id");
+		deleteBtn.onclick = function(e){
+			const venueId = v_id;
+			console.log('event is', e);
+			console.log('id is', venueId);
+			fetch('/venues/' + venueId ,{
+				method: 'DELETE',
+			})
+			.then(function() {
+				const item = e.target.parentElement;
+				item.remove();
+			})
+		}
+	} 
+</script>
 {% endblock %}
